@@ -14,7 +14,7 @@ public enum RulesApplier {
         do {
             try SharedStorage.save(json: summary.json, source: text)
             SharedStorage.log("app: saved \(summary.entries) entries")
-            status = "Saved \(Wording.count(summary.entries, "entry", "entries")). Restart Mail."
+            status = "Saved \(Wording.count(summary.entries, "entry", "entries"))."
         } catch {
             status = "Could not save: \(error.localizedDescription)"
         }

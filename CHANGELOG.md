@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Convert and save asks Mail to reload the rules (`MEExtensionManager.reloadContentBlocker`). The window and the README no longer say that Mail reads the rules only at launch: a message open in the preview pane keeps the old rules until the reload, and a new message window picks the new ones up on its own.
+
 ### Deprecated
 
 ### Removed

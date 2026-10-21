@@ -25,7 +25,7 @@ Built for the talk "Blocking Without Feedback: Mail Tracker Protection Inside Ap
 
 1. Run the app once, then in Mail open **Settings › Extensions** and turn on "Mail Blocker".
 2. Edit the rules in the app and press **Convert and save**.
-3. Quit and reopen Mail (the **Quit and reopen Mail** button does it). Mail reads the rules only when it launches.
+3. **Convert and save** also asks Mail to reload the rules. A message window you open afterwards picks them up on its own; a message already open in the preview pane needs that reload. If a change does not show, quit and reopen Mail (the **Quit and reopen Mail** button does it).
 4. A list can also be opened from outside: `open -a "Mail Blocker" list.txt` (or drop a .txt file on the Dock icon). It replaces the editor text and is applied at once.
 5. The "Extension log" in the app shows when Mail last asked the extension for its rules.
 
@@ -53,8 +53,8 @@ try SharedStorage.save(json: summary.json, source: "||pixel.example.com^$image")
 These are results of our runs on macOS 27 with SafariConverterLib 4.3.0.
 
 - **No feedback.** MailKit has no callback for blocked requests, no counter, and no way to ask whether the user
-  turned the extension on. `reloadContentBlocker` reports success but Mail applies new rules only at launch,
-  hence the restart.
+  turned the extension on. `reloadContentBlocker` completes without an error, but nothing says whether Mail
+  reloaded or when. Without it, a message that is already open in the preview pane keeps the old rules.
 - **Network rules work, domain rules do not.** URL patterns with `$image`, `$third-party`, path-only patterns and
   exceptions block. `$domain=` with a positive domain never fires, `$domain=~` always applies, and domain-scoped
   cosmetic rules are shipped but have no effect. Generic `##` rules do hide elements.

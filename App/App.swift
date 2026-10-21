@@ -1,3 +1,4 @@
+import MailKit
 import SwiftUI
 import MailBlockerCore
 import MailBlockerShared
@@ -65,7 +66,8 @@ struct ContentView: View {
             GroupBox {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("1. Mail › Settings › Extensions: turn on “Mail Blocker”.")
-                    Text("2. After every change, quit and reopen Mail. Mail applies new rules only at launch.")
+                    Text("2. Convert and save asks Mail to reload the rules.")
+                    Text("If a change does not show, quit and reopen Mail.")
                     Text("There is no API that tells you the extension is on, or what it blocked.")
                         .foregroundStyle(.secondary)
                 }
@@ -132,6 +134,20 @@ struct ContentView: View {
         summary = outcome.summary
         status = outcome.status
         log = SharedStorage.readLog()
+        askMailToReload()
+    }
+
+    /// Mail keeps the rules it already has for a message that is open; this asks it to read them again.
+    /// The answer only says the request was accepted: nothing tells us whether Mail did it or when.
+    private func askMailToReload() {
+        guard let id = Bundle.main.bundleIdentifier.map({ $0 + ".extension" }) else { return }
+        MEExtensionManager.reloadContentBlocker(withIdentifier: id) { error in
+            DispatchQueue.main.async {
+                let answer = error.map { "error: \($0.localizedDescription)" } ?? "accepted"
+                SharedStorage.log("app: reloadContentBlocker -> \(answer)")
+                log = SharedStorage.readLog()
+            }
+        }
     }
 
     private func restartMail() {

@@ -19,13 +19,13 @@ final class ApplierTests: XCTestCase {
     func testApplySavesTheJSONAndTheSourceForTheExtension() throws {
         let outcome = RulesApplier.apply("||pixel.example.com^$image\n||track.example.net^")
         XCTAssertEqual(outcome.summary.entries, 2)
-        XCTAssertEqual(outcome.status, "Saved 2 entries. Restart Mail.")
+        XCTAssertEqual(outcome.status, "Saved 2 entries.")
         XCTAssertEqual(SharedStorage.loadRules(), outcome.summary.json)
         XCTAssertEqual(SharedStorage.loadSource(), "||pixel.example.com^$image\n||track.example.net^")
     }
 
     func testStatusUsesTheSingularForOneEntry() {
-        XCTAssertEqual(RulesApplier.apply("||a.example^").status, "Saved 1 entry. Restart Mail.")
+        XCTAssertEqual(RulesApplier.apply("||a.example^").status, "Saved 1 entry.")
     }
 
     func testApplyingAnEmptyListSavesTheListThatBlocksNothing() {
