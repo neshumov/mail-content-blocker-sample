@@ -1,0 +1,4 @@
+// Defaults. Put your own values in Local.xcconfig (not committed); it is included last and wins.
+BUNDLE_ID_PREFIX = com.example.mailblocker
+DEVELOPMENT_TEAM =
+#include? "Local.xcconfig"

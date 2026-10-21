@@ -1,0 +1,5 @@
+// cp Local.xcconfig.example Local.xcconfig, then fill in.
+// Your Apple developer team (a free Personal Team works): Xcode > Settings > Accounts, or the 10-character ID.
+DEVELOPMENT_TEAM =
+// Must be unique to you: an App ID is registered for it at first build.
+BUNDLE_ID_PREFIX = com.yourname.mailblocker

@@ -1,0 +1,48 @@
+name: MailBlocker
+options:
+  bundleIdPrefix: com.example.mailblocker
+  deploymentTarget:
+    macOS: "14.0"
+configFiles:
+  Debug: Config.xcconfig
+  Release: Config.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_HARDENED_RUNTIME: NO
+packages:
+  SafariConverterLib:
+    url: https://github.com/AdguardTeam/SafariConverterLib.git
+    exactVersion: 4.3.0
+targets:
+  MailBlocker:
+    type: application
+    platform: macOS
+    sources: [App, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX)
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Mail Blocker
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        CODE_SIGN_ENTITLEMENTS: App/App.entitlements
+    dependencies:
+      - target: MailBlockerExtension
+        embed: true
+      - package: SafariConverterLib
+        product: ContentBlockerConverter
+  MailBlockerExtension:
+    type: app-extension
+    platform: macOS
+    sources: [Extension, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(BUNDLE_ID_PREFIX).extension
+        INFOPLIST_FILE: Extension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Extension/Extension.entitlements
+        PRODUCT_NAME: MailBlockerExtension
+        OTHER_LDFLAGS: "-framework MailKit"
+        ENABLE_DEBUG_DYLIB: NO
+    dependencies:
+      - sdk: MailKit.framework

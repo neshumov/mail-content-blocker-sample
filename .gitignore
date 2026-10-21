@@ -1,0 +1,5 @@
+Local.xcconfig
+MailBlocker.xcodeproj/
+build/
+DerivedData/
+.DS_Store
