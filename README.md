@@ -45,4 +45,5 @@ These are results of our runs on macOS 27 with SafariConverterLib 4.3.0.
 | `Extension/MailExtension.swift` | `MEExtension` and `MEContentBlocker`: `contentRulesJSON()` returns the saved JSON |
 | `Shared/SharedStorage.swift` | App Group file with the rules, the source text and a small log |
 | `App/Converter.swift` | AdGuard rules to WebKit JSON, entry limit and warnings |
+| `tools/make_icon.py` | Draws the app icon into `App/Assets.xcassets` (needs Pillow; the generated PNGs are committed) |
 | `App/App.swift` | The window: editor, convert and save, restart Mail, JSON and log views |
