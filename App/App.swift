@@ -6,23 +6,23 @@ import MailBlockerShared
 /// It may arrive before the window exists, so it waits here until the window picks it up.
 enum OpenedRules {
     static let didArrive = Notification.Name("MailBlocker.openedRules")
-    private(set) static var pending: String?
+    private(set) static var pending: Result<String, Error>?
 
-    static func take() -> String? {
+    static func take() -> Result<String, Error>? {
         defer { pending = nil }
         return pending
     }
 
-    static func deliver(_ text: String) {
-        pending = text
+    static func deliver(_ result: Result<String, Error>) {
+        pending = result
         NotificationCenter.default.post(name: didArrive, object: nil)
     }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func application(_ application: NSApplication, open urls: [URL]) {
-        guard let url = urls.first, let text = try? String(contentsOf: url, encoding: .utf8) else { return }
-        OpenedRules.deliver(text)
+        guard let url = urls.first else { return }
+        OpenedRules.deliver(Result { try String(contentsOf: url, encoding: .utf8) })
     }
 }
 
@@ -32,7 +32,8 @@ struct MailBlockerApp: App {
     private var delegate
 
     var body: some Scene {
-        WindowGroup { ContentView() }
+        // One window only: a WindowGroup would open a new window for every file handed to the app.
+        Window("Mail Blocker", id: "main") { ContentView() }
             .windowResizability(.contentMinSize)
     }
 }
@@ -72,7 +73,9 @@ struct ContentView: View {
 
             if let current = summary {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(current.sourceRules) rules → \(current.entries) entries").font(.headline)
+                    let rulesText = count(current.sourceRules, "rule", "rules")
+                    let entriesText = count(current.entries, "entry", "entries")
+                    Text("\(rulesText) → \(entriesText)").font(.headline)
                     ForEach(current.warnings, id: \.self) { Text("⚠︎ \($0)").foregroundStyle(.orange) }
                 }
             }
@@ -131,9 +134,19 @@ struct ContentView: View {
 
     /// A file opened from outside replaces the editor text and is applied at once.
     private func useOpenedRules() {
-        guard let text = OpenedRules.take() else { return }
-        rules = text
-        apply()
+        switch OpenedRules.take() {
+        case .none:
+            return
+        case .success(let text):
+            rules = text
+            apply()
+        case .failure:
+            status = "Could not read the file as UTF-8 text; nothing changed."
+        }
+    }
+
+    private func count(_ number: Int, _ one: String, _ many: String) -> String {
+        "\(number) \(number == 1 ? one : many)"
     }
 
     private func apply() {
@@ -141,7 +154,7 @@ struct ContentView: View {
         summary = result
         do {
             try SharedStorage.save(json: result.json, source: rules)
-            status = "Saved \(result.entries) entries. Restart Mail."
+            status = "Saved \(count(result.entries, "entry", "entries")). Restart Mail."
             SharedStorage.log("app: saved \(result.entries) entries")
         } catch {
             status = "Could not save: \(error.localizedDescription)"
