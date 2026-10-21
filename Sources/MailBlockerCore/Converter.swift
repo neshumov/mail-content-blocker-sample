@@ -1,19 +1,20 @@
 import ContentBlockerConverter
 import Foundation
+import MailBlockerShared
 
-struct ConversionSummary {
-    let sourceRules: Int
-    let entries: Int
-    let json: Data
-    let warnings: [String]
+public struct ConversionSummary {
+    public let sourceRules: Int
+    public let entries: Int
+    public let json: Data
+    public let warnings: [String]
 }
 
 /// AdGuard rules -> WebKit content-blocking JSON, the format MEContentBlocker returns.
-enum Converter {
+public enum Converter {
     /// WebKit does not load a list longer than this.
-    static let entryLimit = 150_000
+    public static let entryLimit = 150_000
 
-    static func convert(_ text: String) -> ConversionSummary {
+    public static func convert(_ text: String) -> ConversionSummary {
         let rules = text.split(whereSeparator: \.isNewline)
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty && !$0.hasPrefix("!") }

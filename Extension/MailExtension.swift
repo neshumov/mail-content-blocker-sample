@@ -1,4 +1,5 @@
 import MailKit
+import MailBlockerShared
 
 /// Mail instantiates this class (NSExtensionPrincipalClass in Info.plist).
 final class MailExtension: NSObject, MEExtension {

@@ -3,3 +3,5 @@ MailBlocker.xcodeproj/
 build/
 DerivedData/
 .DS_Store
+.build/
+.swiftpm/
