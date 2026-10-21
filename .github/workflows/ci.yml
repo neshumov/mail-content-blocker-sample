@@ -1,5 +1,9 @@
 name: CI
 
+# macos-26 is the current stable image (macOS 26.6, Xcode 26.6 by default).
+# xcode-27 is the preview image with macOS 27 and Xcode 27, the toolchain the app is developed on;
+# a failure there is reported but does not fail the workflow while the image is a preview.
+
 on:
   pull_request:
   push:
@@ -14,9 +18,9 @@ concurrency:
 
 jobs:
   swiftlint:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install SwiftLint
         run: brew install swiftlint
@@ -25,17 +29,42 @@ jobs:
         run: swiftlint lint --strict
 
   test:
-    runs-on: macos-15
+    name: test (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    continue-on-error: ${{ matrix.preview }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-26
+            preview: false
+          - runner: xcode-27
+            preview: true
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
 
       - name: Test the Swift package
         run: swift test
 
   build-app:
-    runs-on: macos-15
+    name: build app (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    continue-on-error: ${{ matrix.preview }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-26
+            preview: false
+          - runner: xcode-27
+            preview: true
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install XcodeGen
         run: brew install xcodegen
