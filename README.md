@@ -34,7 +34,7 @@ Built for the talk "Blocking Without Feedback: Mail Tracker Protection Inside Ap
 The conversion and the storage are Swift package libraries, so another Mail extension can reuse them.
 
 ```swift
-.package(url: "https://github.com/<owner>/mail-content-blocker-sample.git", from: "0.1.0"),
+.package(url: "https://github.com/neshumov/mail-content-blocker-sample.git", from: "0.1.0"),
 ```
 
 Products:

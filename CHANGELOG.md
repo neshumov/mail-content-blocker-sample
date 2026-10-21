@@ -23,4 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The extension and the app now share one bundle version (the build warned that the app had none).
+
 ### Security
