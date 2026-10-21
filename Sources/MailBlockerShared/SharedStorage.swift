@@ -4,17 +4,20 @@ import Security
 /// The rules JSON and a small log, shared between the app and the extension through an App Group.
 public enum SharedStorage {
     /// A valid list that blocks nothing. WebKit refuses an empty array, so this is one harmless rule.
-    public static let emptyRules = Data(#"[{"trigger":{"url-filter":"^https?://nothing\\.invalid/"},"action":{"type":"ignore-previous-rules"}}]"#.utf8)
+    public static let emptyRules = Data(
+        #"[{"trigger":{"url-filter":"^https?://nothing\\.invalid/"},"action":{"type":"ignore-previous-rules"}}]"#.utf8
+    )
 
     public static var container: URL? {
-        // macOS group IDs start with the team ID; read the real one from our own entitlement.
+        // macOS group IDs start with the team ID; read the real one from our entitlement.
         guard let id = groupID else { return nil }
         return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: id)
     }
 
     public static var groupID: String? {
+        let key = "com.apple.security.application-groups" as CFString
         guard let task = SecTaskCreateFromSelf(nil),
-              let groups = SecTaskCopyValueForEntitlement(task, "com.apple.security.application-groups" as CFString, nil) as? [String]
+              let groups = SecTaskCopyValueForEntitlement(task, key, nil) as? [String]
         else { return nil }
         return groups.first
     }

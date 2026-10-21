@@ -43,10 +43,10 @@ struct ContentView: View {
                 Text(status).foregroundStyle(.secondary)
             }
 
-            if let s = summary {
+            if let current = summary {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("\(s.sourceRules) rules → \(s.entries) entries").font(.headline)
-                    ForEach(s.warnings, id: \.self) { Text("⚠︎ \($0)").foregroundStyle(.orange) }
+                    Text("\(current.sourceRules) rules → \(current.entries) entries").font(.headline)
+                    ForEach(current.warnings, id: \.self) { Text("⚠︎ \($0)").foregroundStyle(.orange) }
                 }
             }
 
