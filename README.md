@@ -26,7 +26,8 @@ Built for the talk "Blocking Without Feedback: Mail Tracker Protection Inside Ap
 1. Run the app once, then in Mail open **Settings › Extensions** and turn on "Mail Blocker".
 2. Edit the rules in the app and press **Convert and save**.
 3. Quit and reopen Mail (the **Quit and reopen Mail** button does it). Mail reads the rules only when it launches.
-4. The "Extension log" in the app shows when Mail last asked the extension for its rules.
+4. A list can also be opened from outside: `open -a "Mail Blocker" list.txt` (or drop a .txt file on the Dock icon). It replaces the editor text and is applied at once.
+5. The "Extension log" in the app shows when Mail last asked the extension for its rules.
 
 ## Using as a library
 

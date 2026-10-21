@@ -2,8 +2,35 @@ import SwiftUI
 import MailBlockerCore
 import MailBlockerShared
 
+/// A rules file handed to the app (Finder, `open -a "Mail Blocker" list.txt`, drag onto the Dock icon).
+/// It may arrive before the window exists, so it waits here until the window picks it up.
+enum OpenedRules {
+    static let didArrive = Notification.Name("MailBlocker.openedRules")
+    private(set) static var pending: String?
+
+    static func take() -> String? {
+        defer { pending = nil }
+        return pending
+    }
+
+    static func deliver(_ text: String) {
+        pending = text
+        NotificationCenter.default.post(name: didArrive, object: nil)
+    }
+}
+
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard let url = urls.first, let text = try? String(contentsOf: url, encoding: .utf8) else { return }
+        OpenedRules.deliver(text)
+    }
+}
+
 @main
 struct MailBlockerApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self)
+    private var delegate
+
     var body: some Scene {
         WindowGroup { ContentView() }
             .windowResizability(.contentMinSize)
@@ -82,12 +109,14 @@ struct ContentView: View {
         }
         .padding(20)
         .frame(minWidth: 560, minHeight: 640)
+        .onReceive(NotificationCenter.default.publisher(for: OpenedRules.didArrive)) { _ in useOpenedRules() }
         .onAppear {
             if SharedStorage.container == nil {
                 status = "No App Group: check DEVELOPMENT_TEAM in Local.xcconfig"
             } else {
                 summary = Converter.convert(rules)
                 log = SharedStorage.readLog()
+                useOpenedRules()
             }
         }
     }
@@ -98,6 +127,13 @@ struct ContentView: View {
               let pretty = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys]),
               let text = String(data: pretty, encoding: .utf8) else { return "nothing saved yet" }
         return text
+    }
+
+    /// A file opened from outside replaces the editor text and is applied at once.
+    private func useOpenedRules() {
+        guard let text = OpenedRules.take() else { return }
+        rules = text
+        apply()
     }
 
     private func apply() {

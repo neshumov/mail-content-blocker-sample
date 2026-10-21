@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`MEContentBlocker`) that hands the converted rules to Mail.
 - `MailBlockerCore` and `MailBlockerShared` Swift package libraries.
 - App icon.
+- Opening a rules file (`open -a "Mail Blocker" list.txt`) loads it into the editor and applies it.
 
 ### Changed
 
