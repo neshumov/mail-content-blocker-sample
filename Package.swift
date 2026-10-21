@@ -36,8 +36,12 @@ let package = Package(
             ]
         ),
         .testTarget(
+            name: "MailBlockerSharedTests",
+            dependencies: ["MailBlockerShared"]
+        ),
+        .testTarget(
             name: "MailBlockerCoreTests",
-            dependencies: ["MailBlockerCore"]
+            dependencies: ["MailBlockerCore", "MailBlockerShared"]
         ),
     ]
 )

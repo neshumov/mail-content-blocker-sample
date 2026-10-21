@@ -40,7 +40,7 @@ The conversion and the storage are Swift package libraries, so another Mail exte
 Products:
 
 - `MailBlockerCore`: `Converter.convert(_:)` turns the text of a list into a `ConversionSummary`
-  (entries, JSON, warnings).
+  (entries, JSON, warnings); `RulesApplier.apply(_:)` also saves it for the extension; `RulesFile` reads a list handed to the app.
 - `MailBlockerShared`: `SharedStorage`, the App Group file the app writes and the extension reads.
 
 ```swift
@@ -95,7 +95,9 @@ app: it records every call of `contentRulesJSON()`.
 | `Extension/MailExtension.swift` | `MEExtension` and `MEContentBlocker`: `contentRulesJSON()` returns the saved JSON |
 | `Sources/MailBlockerShared/` | App Group file with the rules, the source text and a small log |
 | `Sources/MailBlockerCore/` | AdGuard rules to WebKit JSON, entry limit and warnings |
-| `Tests/MailBlockerCoreTests/` | Tests of the conversion |
+| `Sources/MailBlockerCore/RulesFile.swift` | Reading a list handed to the app, and the inbox that holds it until the window is ready |
+| `Sources/MailBlockerCore/Applier.swift` | Convert, save for the extension, and the status text the window shows |
+| `Tests/` | Tests of the conversion, the file handling, the inbox, the applier and the shared storage (`swift test`) |
 | `App/App.swift` | The window: editor, convert and save, restart Mail, JSON and log views |
 | `tools/make_icon.py` | Draws the app icon into `App/Assets.xcassets` (needs Pillow; the PNGs are committed) |
 | `project.yml`, `Config.xcconfig` | XcodeGen description and the build settings it reads |

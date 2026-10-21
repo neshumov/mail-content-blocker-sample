@@ -8,7 +8,11 @@ public enum SharedStorage {
         #"[{"trigger":{"url-filter":"^https?://nothing\\.invalid/"},"action":{"type":"ignore-previous-rules"}}]"#.utf8
     )
 
+    /// Tests point the storage at a temporary folder; the real group container needs a signed app.
+    public static var containerOverride: URL?
+
     public static var container: URL? {
+        if let override = containerOverride { return override }
         // macOS group IDs start with the team ID; read the real one from our entitlement.
         guard let id = groupID else { return nil }
         return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: id)

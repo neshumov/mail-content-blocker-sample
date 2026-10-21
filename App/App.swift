@@ -2,27 +2,11 @@ import SwiftUI
 import MailBlockerCore
 import MailBlockerShared
 
-/// A rules file handed to the app (Finder, `open -a "Mail Blocker" list.txt`, drag onto the Dock icon).
-/// It may arrive before the window exists, so it waits here until the window picks it up.
-enum OpenedRules {
-    static let didArrive = Notification.Name("MailBlocker.openedRules")
-    private(set) static var pending: Result<String, Error>?
-
-    static func take() -> Result<String, Error>? {
-        defer { pending = nil }
-        return pending
-    }
-
-    static func deliver(_ result: Result<String, Error>) {
-        pending = result
-        NotificationCenter.default.post(name: didArrive, object: nil)
-    }
-}
-
+/// A file handed to the app (Finder, `open -a "Mail Blocker" list.txt`, drag onto the Dock icon).
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func application(_ application: NSApplication, open urls: [URL]) {
-        guard let url = urls.first else { return }
-        OpenedRules.deliver(Result { try String(contentsOf: url, encoding: .utf8) })
+        guard let result = RulesFile.load(from: urls) else { return }
+        OpenedRulesInbox.shared.deliver(result)
     }
 }
 
@@ -73,9 +57,7 @@ struct ContentView: View {
 
             if let current = summary {
                 VStack(alignment: .leading, spacing: 4) {
-                    let rulesText = count(current.sourceRules, "rule", "rules")
-                    let entriesText = count(current.entries, "entry", "entries")
-                    Text("\(rulesText) → \(entriesText)").font(.headline)
+                    Text(current.headline).font(.headline)
                     ForEach(current.warnings, id: \.self) { Text("⚠︎ \($0)").foregroundStyle(.orange) }
                 }
             }
@@ -112,7 +94,7 @@ struct ContentView: View {
         }
         .padding(20)
         .frame(minWidth: 560, minHeight: 640)
-        .onReceive(NotificationCenter.default.publisher(for: OpenedRules.didArrive)) { _ in useOpenedRules() }
+        .onReceive(NotificationCenter.default.publisher(for: OpenedRulesInbox.didArrive)) { _ in useOpenedRules() }
         .onAppear {
             if SharedStorage.container == nil {
                 status = "No App Group: check DEVELOPMENT_TEAM in Local.xcconfig"
@@ -134,31 +116,21 @@ struct ContentView: View {
 
     /// A file opened from outside replaces the editor text and is applied at once.
     private func useOpenedRules() {
-        switch OpenedRules.take() {
+        switch OpenedRulesInbox.shared.take() {
         case .none:
             return
         case .success(let text):
             rules = text
             apply()
-        case .failure:
-            status = "Could not read the file as UTF-8 text; nothing changed."
+        case .failure(let error):
+            status = error.message
         }
-    }
-
-    private func count(_ number: Int, _ one: String, _ many: String) -> String {
-        "\(number) \(number == 1 ? one : many)"
     }
 
     private func apply() {
-        let result = Converter.convert(rules)
-        summary = result
-        do {
-            try SharedStorage.save(json: result.json, source: rules)
-            status = "Saved \(count(result.entries, "entry", "entries")). Restart Mail."
-            SharedStorage.log("app: saved \(result.entries) entries")
-        } catch {
-            status = "Could not save: \(error.localizedDescription)"
-        }
+        let outcome = RulesApplier.apply(rules)
+        summary = outcome.summary
+        status = outcome.status
         log = SharedStorage.readLog()
     }
 
